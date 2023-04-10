@@ -3,8 +3,9 @@ Game.py - where all the logic should go, including the game loop, and the game s
 Designed for plug-and-play Controllers and Views, so that the game can be played by humans, robots, or both
 '''
 #  TODO once there are more Controllers, have __main__ allow for Controller selection(s) [also applies to Viewers]
-from console_controller import Player as p1
-from AI_Jack_controller import Player as p2
+from typing import List
+from console_controller import Player as p1 # X
+from AI_Jack_controller import Player as p2 # O
 from console_view import Viewer as view
 
 GRID_SIZE = 3 #  Needs to be an odd number (=>3) for Jack algorithm to work
@@ -15,29 +16,36 @@ class TicTacToeGame:
         self.board = [[' ' for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
         self.current_player = 'X' #  First player is X
 
-    def play_game(self, player1, player2):
+    def play_game(self, p1, p2, viewer):
         while True:
-            view.print_board(self)
-            if self.current_player == 'X':
-                player1(self)
+            # print game board here:
+            viewer.print_board(self)
+            # toggle between p1 and p2 controllers each loop
+            move = p1(self) if self.current_player == 'X' else p2(self)
+            
+            if self.move(*move, self.current_player):
+                if self.is_winner('X'):
+                    viewer.message('X wins!')
+                    break
+                elif self.is_winner('O'):
+                    viewer.message('O wins!')
+                    break   
+                elif self.is_draw():
+                    viewer.message('Draw!')
+                    break
             else:
-                player2(self)
-            if self.is_winner('X'):
-                view.message('X wins!')
-                break
-            elif self.is_winner('O'):
-                view.message('O wins!')
-                break
-            elif self.is_draw():
-                view.message('Draw!')
-                break
+                viewer.message('Invalid move, try again')
 
-    #  Convert x, y coordinates to cell number, 1-9
-    def get_cell_number(self, x, y):
-        return x * 3 + y + 1
+    def get_cell_coordinates(self, cell_label):
+        x = (int(cell_label) - 1) // 3
+        y = (int(cell_label) - 1) % 3
+        return x, y
 
     #  return True if move is valid (and claim cell, and swap player), else False
-    def move(self, x, y, player):
+    def move(self, cell, player):
+        if cell is None:
+            return False
+        x, y = self.get_cell_coordinates(cell)
         if self.board[x][y] == ' ':
             self.board[x][y] = player
             self.current_player = 'X' if player == 'O' else 'O'
@@ -45,7 +53,7 @@ class TicTacToeGame:
         return False
     
     #  return list of valid_moves (cells) on self.board       
-    def valid_moves(self):
+    def valid_moves(self) -> List[int]:
         actions = []
         for i in range(3):
             for j in range(3):
@@ -100,4 +108,4 @@ game = TicTacToeGame()
 #  TODO once there are more Controllers, have __main__ allow for Controller selection(s) [also applies to Views]            
 if __name__ == '__main__':
     game = TicTacToeGame()
-    game.play_game(p1, p2)
+    game.play_game(p1('Human', 'X'), p2('AI_Jack', 'O'), view(game))

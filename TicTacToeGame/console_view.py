@@ -1,7 +1,6 @@
 '''
 console_view.py - a console View class for TicTacToeGame, for human players using a console
 '''
-from Game import TicTacToeGame as ttt # get rid of this with dependency injection
 
 class Viewer:
     def __init__(self, name):

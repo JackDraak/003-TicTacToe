@@ -10,11 +10,10 @@ class Player:
     def __call__(self, game):
         while True:
             try:
-                x, y = map(int, input('Enter coordinates x, y for your next move (1-3): ').split())
-                if game.move(x - 1, y - 1, self.symbol):
+                cell = int(input('Enter the cell number for your next move (1-9): '))
+                if game.move(cell, self.symbol):
                     break
                 else:
                     print('Invalid move, try again')
             except ValueError:
                 print('Invalid move, try again')
-        

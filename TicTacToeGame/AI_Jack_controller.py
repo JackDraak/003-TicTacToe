@@ -1,7 +1,6 @@
 '''
 AI_Jack_controller.py - a Controller for TicTacToeGame, using the Jack algorithm
 '''
-from Game import TicTacToeGame # TODO HIGH PRIORITY get rid of this with dependency injection
 
 class Player:
     def __init__(self, name, symbol):
