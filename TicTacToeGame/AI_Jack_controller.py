@@ -1,7 +1,7 @@
 '''
 AI_Jack_controller.py - a Controller for TicTacToeGame, using the Jack algorithm
 '''
-from .Game import TicTacToeGame # get rid of this with dependency injection
+from Game import TicTacToeGame # TODO HIGH PRIORITY get rid of this with dependency injection
 
 class Player:
     def __init__(self, name, symbol):
@@ -26,6 +26,7 @@ class Player:
             x = move // 3
             y = move % 3
             if game.is_blocking_move(x, y):
+                # TODO comlete this
                 pass
 
         #  3. TODO Take one move from highest-score valid_moves using game.SCORE_MATRIX:
@@ -33,6 +34,7 @@ class Player:
             x = move // 3
             y = move % 3
             if game.move(x, y, self.symbol):
+                # TODO comlete this
                 break
             
             

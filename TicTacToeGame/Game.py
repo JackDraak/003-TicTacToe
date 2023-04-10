@@ -3,9 +3,9 @@ Game.py - where all the logic should go, including the game loop, and the game s
 Designed for plug-and-play Controllers and Views, so that the game can be played by humans, robots, or both
 '''
 #  TODO once there are more Controllers, have __main__ allow for Controller selection(s) [also applies to Viewers]
-from .console_controller import Player as p1
-from .AI_Jack_controller import Player as p2
-from .console_view import Viewer as view
+from console_controller import Player as p1
+from AI_Jack_controller import Player as p2
+from console_view import Viewer as view
 
 GRID_SIZE = 3 #  Needs to be an odd number (=>3) for Jack algorithm to work
 SCORE_MATRIX = [[GRID_SIZE - abs(i - j) for j in range(GRID_SIZE)] for i in range(GRID_SIZE)] 
