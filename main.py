@@ -8,28 +8,16 @@ from typing import List
 
 class TicTacToeGame:    
     '''
-    class TicTacToeGame - the game state, including the board, the current player, and the score matrix
-    
-        methods:
-            __init__(self, grid_size)
-            _generate_score_matrix(self, grid_size)
-            get_cell_pos(self, cell_label)
-            get_valid_moves(self) -> List[int]
-            move(self, cell, player) -> bool
-            is_winner(self, player) -> bool
-            is_blocking_move(self, cell, player) -> bool
-            is_draw(self) -> bool
-            quit_game(self)
-            __str__(self) -> str
-    
+    class TicTacToeGame - the game board and state, including the current player, 
+    and the score matrix which evaluates each cell based on its strategic value.
     '''
-    def __init__(self, grid_size):
+    def __init__(self, grid_size) -> None:
         self.board = [[' ' for _ in range(grid_size)] for _ in range(grid_size)]
         self.current_player = 'X' #  First player is X
         self.grid_size = grid_size
         self.score_matrix = self._generate_score_matrix(grid_size)
         
-    def __str__(self):
+    def __str__(self) -> str:
         board_with_labels = [[str((row_idx * self.grid_size) + col_idx + 1) if cell == ' ' else cell for col_idx, cell in enumerate(row)] for row_idx, row in enumerate(self.board)]
         formatted_board = []
         for i, row in enumerate(board_with_labels):
@@ -38,8 +26,15 @@ class TicTacToeGame:
                 formatted_row += '\n' + '-' * (4 * game.grid_size - 3) 
             formatted_board.append(formatted_row)
         return "\n".join(formatted_board)
+    
+    def _count_symbols_in_line(self, player, coords):
+        count = 0
+        for x, y in coords:
+            if self.board[x][y] == player:
+                count += 1
+        return count
                     
-    def _generate_score_matrix(self, grid_size):
+    def _generate_score_matrix(self, grid_size) -> List[List[int]]:
         '''
         Generate a score matrix for the game board, where the score is the number of ways to win from that cell.
         '''
@@ -68,34 +63,54 @@ class TicTacToeGame:
                     moves.append(row * self.grid_size + col + 1)
         return moves
     
-    def is_blocking_move(self, cell, player):
+    def is_blocking_move(self, cell, player) -> bool:
         x, y = self.get_cell_coords_by_label(cell)
         opponent = 'X' if player == 'O' else 'O'
-        if sum([1 for cell in self.board[x] if cell == opponent]) == self.grid_size - 1 and self.board[x][y] == ' ':
-            return True
-        if sum([1 for row in self.board if row[y] == opponent]) == self.grid_size - 1 and self.board[x][y] == ' ':
-            return True
+        lines = [
+            [(x, col) for col in range(self.grid_size)],
+            [(row, y) for row in range(self.grid_size)],
+        ]
         if x == y:
-            if sum([1 for i in range(self.grid_size) if self.board[i][i] == opponent]) == self.grid_size - 1 and self.board[x][y] == ' ':
-                return True
+            lines.append([(i, i) for i in range(self.grid_size)])
         if x + y == self.grid_size - 1:
-            if sum([1 for i in range(self.grid_size) if self.board[i][(self.grid_size - 1) - i] == opponent]) == self.grid_size - 1 and self.board[x][y] == ' ':
+            lines.append([(i, self.grid_size - 1 - i) for i in range(self.grid_size)])
+        for line in lines:
+            if self._count_symbols_in_line(opponent, line) == self.grid_size - 1 and self.board[x][y] == ' ':
                 return True
         return False
  
-    def is_draw(self):
-        return all([cell != ' ' for row in self.board for cell in row])
+    def is_draw(self) -> bool:
+        return not (self.is_winner('X') or self.is_winner('O')) and all([cell != ' ' for row in self.board for cell in row])
+
+    def is_winner(self, player) -> bool:
+        lines = [
+            [(row, col) for col in range(self.grid_size)] for row in range(self.grid_size)
+        ] + [
+            [(row, col) for row in range(self.grid_size)] for col in range(self.grid_size)
+        ] + [
+            [(i, i) for i in range(self.grid_size)],
+            [(i, self.grid_size - 1 - i) for i in range(self.grid_size)],
+        ]
+        for line in lines:
+            if self._count_symbols_in_line(player, line) == self.grid_size:
+                return True
+        return False
     
-    def is_winner(self, player):
-        for row in self.board:
-            if all([cell == player for cell in row]):
+    def is_winning_move(self, cell, player) -> bool:
+        x, y = self.get_cell_coords_by_label(cell)
+        lines = [
+            [(x, col) for col in range(self.grid_size)],
+            [(row, y) for row in range(self.grid_size)],
+        ]
+        if x == y:
+            lines.append([(i, i) for i in range(self.grid_size)])
+        if x + y == self.grid_size - 1:
+            lines.append([(i, self.grid_size - 1 - i) for i in range(self.grid_size)])
+
+        for line in lines:
+            if self._count_symbols_in_line(player, line) == self.grid_size - 1 and self.board[x][y] == ' ':
                 return True
-        for col in range(self.grid_size):
-            if all([self.board[row][col] == player for row in range(self.grid_size)]):
-                return True
-        if all([self.board[i][i] == player for i in range(self.grid_size)]) or all([self.board[i][(self.grid_size - 1) - i] == player for i in range(self.grid_size)]):
-            return True
-        return False 
+        return False
 
     def move(self, cell, player) -> bool:
         '''
@@ -110,34 +125,42 @@ class TicTacToeGame:
             return True
         return False
     
-    def play_game(self, p1, p2, viewer):
-        plays = 0
-        while plays < self.grid_size ** 2:
-            viewer(self)
-            move = p1(self) if self.current_player == 'X' else p2(self)
+    def play_game(self, p1, p2, viewer) -> None:
+        view = viewer(self)
+        view(self)
+        turn = 0
+        while turn < self.grid_size ** 2:
+            if self.current_player == 'X': 
+                move = p1(self)
+            else:
+                move = p2(self) 
+            print(f"turn {turn + 1}: Player {self.current_player} played {move}")
             valid_move = self.move(move, self.current_player)
             if valid_move:
-                plays += 1
-                viewer(game)
+                turn += 1
+                view(self)
                 if self.is_winner('X'):
-                    viewer.message('X wins!')
+                    view.message('X wins!')
                 elif self.is_winner('O'):
-                    viewer.message('O wins!')
+                    view.message('O wins!')
                 elif self.is_draw():
-                    viewer.message('Draw!')
+                    view.message('Draw!')
+            if self.is_winner('X') or self.is_winner('O') or self.is_draw():
+                break   
         self.quit_game()
-    
-    def quit_game(self):
+
+    def quit_game(self) -> None:
         print("Quitting the game...")
         raise SystemExit
 
                     
+#  TODO once there are more Controllers, have __main__ allow for Controller selection(s) [also applies to Viewer]
 if __name__ == '__main__':
-    #  TODO once there are more Controllers, have __main__ allow for Controller selection(s) [also applies to Viewer]
     from controller_console import Player as X
     from controller_AI_Jack import Player as O
-    from view_console import Viewer as view
+    from view_console import Viewer
     GRID_SIZE = 3
     game = TicTacToeGame(GRID_SIZE)
     # play_game requires an 'X' and 'O' Controller, and a View: assigning different symbols WILL NOT WORK
-    game.play_game(X('X'), O('O'), view(game))
+    game.play_game(X('X'), O('O'), Viewer)
+    
