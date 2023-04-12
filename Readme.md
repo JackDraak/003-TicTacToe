@@ -6,9 +6,13 @@
 
  - controller_AI_Jack.py - This file contains a Player class that acts as a controller for an AI player using the AI_Jack algorithm. The AI_Jack algorithm works as follows:
 
+>
 > If there's a winning move, play it.
+>
 > If there are blocking moves, play one from the set with the highest score matrix.
+>
 > If there are no blocking moves, play a random move from the set with the highest score matrix.
+>
 
  - view_console.py - This file contains a Viewer class that provides a console view for the Tic Tac Toe game. It prints the current game board and messages on the console.
 

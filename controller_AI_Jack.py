@@ -10,7 +10,7 @@ import random
 
 class Player:
     '''
-    Player class for TicTacToeGame  -  uses the AI_Jack algorithm:
+    Player class for TicTacToeGame  -  uses the AI_Jack algorithm for it's best move each turn:
     
         1. if there is a winning move, play it, otherwise...
         2. if there are blocking moves, play one from the set with the highest score matrix, otherwise...
@@ -18,23 +18,23 @@ class Player:
     
     score matrix is a 2D array of relative values for each move, based on the number of possible winning lines
     '''
-    def __init__(self, player):
+    def __init__(self, player) -> None:
         self.player = player
 
-    def __call__(self, game):   
+    def __call__(self, game, view) -> int:  
         moves = game.get_valid_moves()
         if len(moves) == 0:
-            print('AI_Jack: No valid moves!')
+            game.message('AI_Jack: No valid moves!')
             return None
         if len(moves) == 1:
-            print('AI_Jack: Last valid move!')
+            game.message('AI_Jack: Last move!')
             return moves[0]
-        # 1. if there is a winning move, play it
+        # 1. AI_Jack: if there is a winning move, play it
         for move in moves:
             if game.is_winning_move(move, self.player):
-                print('AI_Jack: Winning move!')
+                game.message('AI_Jack: Winning move!')
                 return move
-        # 2. if there are blocking moves, play one from the set with the highest score_matrix
+        # 2. AI_Jack: if there are blocking moves, play one from the set with the highest score_matrix
         blocking_moves = []
         for move in moves:
             if game.is_blocking_move(move, self.player):
@@ -50,9 +50,9 @@ class Player:
                     best_moves = [move]
                 elif score == max_score:
                     best_moves.append(move)
-            print('AI_Jack: Blocking move!')
+            game.message('AI_Jack: Blocking move!')
             return random.choice(best_moves)    
-        # 3. if there are no blocking moves, play a random move from the set with the highest score_matrix
+        # 3. AI_Jack: if there are no blocking moves, play a random move from the set with the highest score_matrix
         max_score = 0
         best_moves = []
         for move in moves:
@@ -63,5 +63,5 @@ class Player:
                 best_moves = [move]
             elif score == max_score:
                 best_moves.append(move)
-        print("AI_Jack: I'll try this!")
+        game.message('AI_Jack: I\'ll try this!')
         return random.choice(best_moves)
